@@ -78,7 +78,7 @@ type Square =
 	| 'g1'
 	| 'h1';
 
-type EPSquare =
+export type EPSquare =
 	| '-'
 	| 'a3'
 	| 'b3'
@@ -149,13 +149,40 @@ const pieces: Record<PieceChar, PieceNumber> = {
  * Forsyth-Edwards Notation (FEN).
  */
 export abstract class Book {
+	protected abstract findKey(
+		fen: string,
+	): Promise<[number, number] | undefined>;
+
+	/**
+	 * Return a mapping from piece characters (p, P, n, N, ...) to their
+	 * respective numerical representation.
+	 */
+	protected pieces(): Record<PieceChar, PieceNumber> {
+		return pieces;
+	}
+
+	/**
+	 *
+	 */
+	public lookupFEN(fen: string) {
+		const range = this.findKey(fen);
+		if (!range) return;
+
+		// my $entry = Chess::Opening::Book::Entry->new($fen);
+		// foreach my $i ($first .. $last) {
+		// 	$entry->addMove($self->_getEntry($i));
+		// }
+		//
+		// return $entry;
+	}
+
 	/**
 	 * Parse a position given as a FEN string.
 	 *
 	 * @param fen - the FEN string
 	 * @returns a Position object.
 	 */
-	protected static parseFEN(fen: string): Record<string, unknown> | undefined {
+	protected parseFEN(fen: string): Position | undefined {
 		const tokens = fen.trim().split(/\s+/);
 		if (tokens.length < 2) return;
 
