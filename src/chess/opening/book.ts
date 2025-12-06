@@ -1,3 +1,5 @@
+import { Entry } from './entry';
+
 type PieceChar =
 	| 'p'
 	| 'P'
@@ -149,9 +151,7 @@ const pieces: Record<PieceChar, PieceNumber> = {
  * Forsyth-Edwards Notation (FEN).
  */
 export abstract class Book {
-	protected abstract findKey(
-		fen: string,
-	): Promise<[number, number] | undefined>;
+	abstract init(): Promise<void>;
 
 	/**
 	 * Return a mapping from piece characters (p, P, n, N, ...) to their
@@ -162,19 +162,11 @@ export abstract class Book {
 	}
 
 	/**
+	 * Look-up a position.
 	 *
+	 * @returns an opening entry or undefined if none found
 	 */
-	public lookupFEN(fen: string) {
-		const range = this.findKey(fen);
-		if (!range) return;
-
-		// my $entry = Chess::Opening::Book::Entry->new($fen);
-		// foreach my $i ($first .. $last) {
-		// 	$entry->addMove($self->_getEntry($i));
-		// }
-		//
-		// return $entry;
-	}
+	abstract lookupFEN(fen: string): Promise<Entry | undefined>;
 
 	/**
 	 * Parse a position given as a FEN string.

@@ -1,6 +1,7 @@
 import * as fs from 'node:fs/promises';
 import { Book, EPSquare } from '../book';
 import { Uint64BE } from 'int64-buffer';
+import { Entry } from '../entry';
 
 const random64 = [
 	new Uint64BE(0x9d39247e, 0x33776d41),
@@ -795,9 +796,9 @@ const randomWhite = random64.slice(780, 780 + 1);
  * The `Polyglot` class represents an opening book in Polyglot (.bin) format.
  */
 export class Polyglot extends Book {
-	private fh: fs.FileHandle;
+	private fh?: fs.FileHandle;
 	private filename: string;
-	private numEntries: number;
+	private numEntries?: number;
 
 	/**
 	 * Creates the object. Calling init() afterwards is mandatory!
@@ -836,6 +837,18 @@ export class Polyglot extends Book {
 		this.numEntries = size >> 4;
 	}
 
+	public async lookupFEN(fen: string) {
+		const range = await this.findKey(fen);
+		if (typeof range === 'undefined') return;
+
+		const entry = new Entry();
+		for (let i = range[0]; i <= range[1]; ++i) {
+			entry.addMove(await this.getEntry(i));
+		}
+
+		return entry;
+	}
+
 	// Do a binary search in the file for the requested position.
 	// Using variations of the binary search like interpolation search or the
 	// newer adaptive search or hybrid search
@@ -855,8 +868,8 @@ export class Polyglot extends Book {
 		let left = 0;
 		let right = this.numEntries;
 
-		let found: Uint64BE;
-		let mid: number;
+		let found: Uint64BE = undefined as unknown as Uint64BE;
+		let mid: number = 0;
 		while (left < right) {
 			mid = left + ((right - left) >> 1);
 			found = await this.getEntryKey(mid);
@@ -870,27 +883,27 @@ export class Polyglot extends Book {
 		}
 
 		// Found?
-		if (key !== found) {
+		if (typeof found === 'undefined' || key.toString() != found.toString()) {
 			return;
 		}
 
-		let first = mid;
-		let last = mid;
+		let first = mid!;
+		let last = mid!;
 		while (first - 1 >= 0) {
 			found = await this.getEntryKey(first - 1);
-			if (found !== key) break;
+			if (found.toString() !== key.toString()) break;
 			--first;
 		}
 		while (last + 1 < this.numEntries) {
 			found = await this.getEntryKey(last + 1);
-			if (found !== key) break;
+			if (found.toString() !== key.toString()) break;
 			++last;
 		}
 
 		return [first, last];
 	}
 
-	protected getKey(fen: string): Uint64BE {
+	protected getKey(fen: string): Uint64BE | undefined {
 		let key = new Uint64BE(0, 0);
 
 		const pos = this.parseFEN(fen);
@@ -917,7 +930,7 @@ export class Polyglot extends Book {
 		};
 
 		for (let i = 0; i < pos.castling.length; ++i) {
-			const offset = castlingOffsets[pos.castling[i]];
+			const offset = castlingOffsets[pos.castling[i] as 'K' | 'Q' | 'k' | 'q'];
 			key = this.xor64(key, randomCastling[offset]);
 		}
 
@@ -961,7 +974,7 @@ export class Polyglot extends Book {
 		const position = num << 4;
 
 		const key = Buffer.alloc(8);
-		const { bytesRead } = await this.fh.read(key, { length: 8, position });
+		const { bytesRead } = await this.fh!.read(key, { length: 8, position });
 		if (bytesRead == 0) {
 			throw new Error(`unexpected end-of-file reading from '${this.filename}'`);
 		}
@@ -984,5 +997,48 @@ export class Polyglot extends Book {
 		}
 
 		return new Uint64BE(out);
+	}
+
+	protected async getEntry(
+		num: number,
+	): Promise<{ move: string; weight?: number; learn?: number }> {
+		const offset = num << 4;
+		const buf = Buffer.alloc(16);
+
+		const { bytesRead } = await this.fh!.read(buf, 0, 16, offset);
+		if (bytesRead <= 0) {
+			throw new Error(
+				`error reading from '${this.filename}': unexpected end-of-file`,
+			);
+		}
+		if (bytesRead !== 16) {
+			throw new Error(
+				`unexpected end-of-file reading from '${this.filename}, wanted 16 bytes, got ${bytesRead}`,
+			);
+		}
+
+		const moveBits = buf.readUInt16BE(8);
+		const weight = buf.readUInt16BE(10);
+		const learn = buf.readUInt32BE(12);
+
+		const toFile = moveBits & 0x7;
+		const toRank = (moveBits >> 3) & 0x7;
+		const fromFile = (moveBits >> 6) & 0x7;
+		const fromRank = (moveBits >> 9) & 0x7;
+		const promote = (moveBits >> 12) & 0x7;
+		const promotionPieces = ['', 'k', 'b', 'r', 'q'];
+
+		const move =
+			String.fromCharCode('a'.charCodeAt(0) + fromFile) +
+			String.fromCharCode('1'.charCodeAt(0) + fromRank) +
+			String.fromCharCode('a'.charCodeAt(0) + toFile) +
+			String.fromCharCode('1'.charCodeAt(0) + toRank) +
+			(promotionPieces[promote] ?? '');
+
+		if (!/^[a-h][1-8][a-h][1-8][kbrq]?$/.test(move)) {
+			throw new Error(`error: '${this.filename}' is corrupted`);
+		}
+
+		return { move, weight, learn };
 	}
 }
