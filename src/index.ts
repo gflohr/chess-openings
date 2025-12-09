@@ -1,1 +1,1 @@
-export * from './chess/opening';
+export * from './chess/openings';
