@@ -856,58 +856,75 @@ export class Polyglot extends Book {
 	// because it involves significantly more disk access.
 	// This method returns a range of matching records.
 	protected async findKey(fen: string): Promise<[number, number] | undefined> {
+		if (typeof this.numEntries === 'undefined') {
+			throw new Error('Object is not initialised!');
+		}
+
 		const key = this.getKey(fen);
 		if (!key) {
 			return;
 		}
 
-		if (typeof this.numEntries === 'undefined') {
-			throw new Error('Object is not initialised!');
-		}
-
+		// First find the lower bound. Whenever possible, we also reduce the
+		// search space for the upper bound.
 		let left = 0;
 		let right = this.numEntries;
+		let right2 = right;
 
-		let found: Uint64BE = undefined as unknown as Uint64BE;
 		let mid: number = 0;
+		let found: Uint64BE;
 		while (left < right) {
-			mid = left + ((right - left) >> 1);
-			found = await this.getEntryKey(mid);
-			if (found > key) {
-				right = right == mid ? mid - 1 : mid;
-			} else if (found < key) {
-				left = left == mid ? mid + 1 : mid;
+			mid = (left + right) >> 1;
+			const key_at = await this.getEntryKey(mid);
+			const cmp = this.cmp64(key_at, key);
+			if (cmp < 0) {
+				left = mid + 1;
+			} else if (cmp > 0) {
+				right = mid - 1;
+				right2 = mid;
 			} else {
-				break;
+				found = key_at;
+				right = mid;
 			}
 		}
 
-		// Found?
-		if (typeof found === 'undefined' || key.toString() != found.toString()) {
-			return;
+		if (left >= this.numEntries) return;
+		if (typeof found! === 'undefined') {
+			const key_at = await this.getEntryKey(left);
+			if (this.cmp64(key_at, key)) return;
+		}
+		if (right > left) return;
+
+		const lower = left;
+		right = right2 - 1;
+
+		while (left <= right) {
+			mid = (left + right) >> 1;
+			const key_at = await this.getEntryKey(mid);
+			const cmp = this.cmp64(key_at, key);
+
+			if (cmp > 0) {
+				right = mid - 1;
+			} else if (cmp < 0) {
+				if (left === mid) return;
+				left = mid;
+			} else {
+				left = mid + 1;
+			}
 		}
 
-		let first = mid!;
-		let last = mid!;
-		while (first - 1 >= 0) {
-			found = await this.getEntryKey(first - 1);
-			if (found.toString() !== key.toString()) break;
-			--first;
-		}
-		while (last + 1 < this.numEntries) {
-			found = await this.getEntryKey(last + 1);
-			if (found.toString() !== key.toString()) break;
-			++last;
-		}
+		const upper = right;
 
-		return [first, last];
+		return [lower, upper];
 	}
 
 	protected getKey(fen: string): Uint64BE | undefined {
 		let key = new Uint64BE(0, 0);
 
 		const pos = this.parseFEN(fen);
-		if (!pos) return;
+		if (!pos) {
+			throw new Error(`invalid fen: ${fen}`);
+		}
 
 		const pieces = this.pieces();
 
@@ -992,11 +1009,26 @@ export class Polyglot extends Book {
 		const bufB = b.toBuffer();
 
 		const out = Buffer.alloc(8);
-		for (let i = 0; i < 8; i++) {
+		for (let i = 0; i < 8; ++i) {
 			out[i] = bufA[i] ^ bufB[i];
 		}
 
 		return new Uint64BE(out);
+	}
+
+	private cmp64(a: Uint64BE, b: Uint64BE): -1 | 0 | 1 {
+		const bufA = a.toBuffer();
+		const bufB = b.toBuffer();
+
+		for (let i = 0; i < 8; ++i) {
+			if (bufA[i] < bufB[i]) {
+				return -1;
+			} else if (bufA[i] > bufB[i]) {
+				return 1;
+			}
+		}
+
+		return 0;
 	}
 
 	protected async getEntry(

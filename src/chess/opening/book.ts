@@ -81,7 +81,7 @@ type Square =
 	| 'h1';
 
 export type EPSquare =
-	| '-'
+	| ''
 	| 'a3'
 	| 'b3'
 	| 'c3'
@@ -126,7 +126,7 @@ type Position = {
 	pieces: LocatedPiece[];
 	turn: 'w' | 'b';
 	castling: Castling;
-	epSquare: EPSquare;
+	epSquare: EPSquare | undefined;
 	halfmoveClock: number;
 	fullmoveNumber: number;
 };
@@ -192,7 +192,7 @@ export abstract class Book {
 		}
 
 		if (tokens[3] === '-') {
-			result.epSquare = tokens[3];
+			result.epSquare = '';
 		} else if (result.turn === 'w' && tokens[3].match(/^[a-h]6$/)) {
 			result.epSquare = tokens[3] as EPSquare;
 		} else if (result.turn === 'b' && tokens[3].match(/^[a-h]3$/)) {
@@ -231,7 +231,7 @@ export abstract class Book {
 			let file = 0;
 			for (let j = 0; j < ranks[i].length; ++j) {
 				const piece = ranks[i][j] as PieceChar;
-				if (piece > '1' && piece <= '8') {
+				if (piece >= '1' && piece <= '8') {
 					file += parseInt(piece);
 				} else if (Object.prototype.hasOwnProperty.call(pieces, piece)) {
 					if (file > 7) return;

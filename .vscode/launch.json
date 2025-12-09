@@ -7,6 +7,23 @@
 			"program": "${workspaceFolder}/src/zzztest.ts",
 			"preLaunchTask": "tsc: build - tsconfig.json",
 			"outFiles": ["${workspaceFolder}/dist/**/*.js"]
+		},
+		{
+			"name": "Debug Tests",
+			"type": "node",
+			"request": "launch",
+			"runtimeArgs": [
+				"--inspect-brk",
+				"${workspaceRoot}/node_modules/.bin/jest",
+				"--runInBand",
+				"--coverage",
+				"false",
+				"--silent",
+				"false"
+			],
+			"cwd": "${workspaceFolder}",
+			"console": "integratedTerminal",
+			"internalConsoleOptions": "neverOpen"
 		}
 	]
 }
