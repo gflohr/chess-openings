@@ -1,4 +1,4 @@
-type MoveArguments = {
+type ContinuationArguments = {
 	move: string;
 	weight?: number;
 	learn?: number;
@@ -22,7 +22,7 @@ export type Continuation = {
 	 * An additional number describing the move.
 	 */
 	learn: number;
-}
+};
 export class Entry {
 	private _epd: string;
 	private _continuations: Continuation[] = [];
@@ -36,7 +36,7 @@ export class Entry {
 	 *
 	 * @param args An object containing at least the move in any notation.
 	 */
-	public addMove(args: MoveArguments) {
+	public addContinuation(args: ContinuationArguments) {
 		if (!Object.prototype.hasOwnProperty.call(args, 'move')) {
 			throw new Error("The parameter 'move' is mandatory!");
 		}
@@ -120,7 +120,10 @@ export class Entry {
 		}
 
 		// Compute total weight.
-		const totalWeight = this._continuations.reduce((sum, m) => sum + (m.weight ?? 0), 0);
+		const totalWeight = this._continuations.reduce(
+			(sum, m) => sum + (m.weight ?? 0),
+			0,
+		);
 		if (totalWeight === 0) {
 			// All weights are zero -> pick randomly.
 			const index = Math.floor(Math.random() * this._continuations.length);

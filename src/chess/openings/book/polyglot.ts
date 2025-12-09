@@ -851,7 +851,7 @@ export class Polyglot implements Book {
 
 		const entry = new Entry(epd);
 		for (let i = range[0]; i <= range[1]; ++i) {
-			entry.addMove(await this.getEntry(i));
+			entry.addContinuation(await this.getEntry(i));
 		}
 
 		return entry;

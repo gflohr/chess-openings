@@ -833,7 +833,7 @@ describe('Polyglot lookup', () => {
 		const wantedEntry = new Entry(fen as string);
 
 		(moves as { move: string; weight: number }[]).forEach(moveSpec => {
-			wantedEntry.addMove(moveSpec);
+			wantedEntry.addContinuation(moveSpec);
 		});
 
 		const gotEntry = await book.lookup(fen as string);

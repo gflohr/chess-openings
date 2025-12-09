@@ -44,7 +44,7 @@ export class ECO implements Book {
 		const entry = new ECOEntry(epd, position.eco, position.name);
 
 		for (let i = 0; i < position.moves.length; ++i) {
-			entry.addMove({ move: position.moves[i] });
+			entry.addContinuation({ move: position.moves[i] });
 		}
 
 		return entry;
