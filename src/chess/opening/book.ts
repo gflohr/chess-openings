@@ -16,7 +16,7 @@ export interface Book {
 	 *
 	 * @returns an opening entry or undefined if none found
 	 */
-	lookupFEN(fen: string): Promise<Entry | undefined>;
+	lookup(fen: string): Promise<Entry | undefined>;
 
 	/**
 	 * Close the book and free all resources.

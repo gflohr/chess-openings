@@ -23,8 +23,8 @@ export class ECO implements Book {
 	 * @params fen - the position in Forsyth-Edwards Notation FEN
 	 * @returns the entry if found, undefined otherwise
 	 */
-	public async lookupFEN(fen: string): Promise<ECOEntry | undefined> {
-		return this.lookupFENSync(fen);
+	public async lookup(fen: string): Promise<ECOEntry | undefined> {
+		return this.lookupSync(fen);
 	}
 
 	/**
@@ -33,7 +33,7 @@ export class ECO implements Book {
 	 * @params fen - the position in Forsyth-Edwards Notation FEN
 	 * @returns the entry if found, undefined otherwise
 	 */
-	public lookupFENSync(fen: string): ECOEntry | undefined {
+	public lookupSync(fen: string): ECOEntry | undefined {
 		const epd = this.fen2epd(fen);
 		if (!Object.prototype.hasOwnProperty.call(eco, epd)) {
 			return undefined;

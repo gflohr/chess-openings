@@ -836,7 +836,7 @@ describe('Polyglot lookup', () => {
 			wantedEntry.addMove(moveSpec);
 		});
 
-		const gotEntry = await book.lookupFEN(fen as string);
+		const gotEntry = await book.lookup(fen as string);
 		expect(gotEntry).toBeDefined();
 	});
 });

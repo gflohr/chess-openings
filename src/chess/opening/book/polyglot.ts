@@ -844,7 +844,7 @@ export class Polyglot implements Book {
 		return tokens.join(' ');
 	}
 
-	public async lookupFEN(fen: string) {
+	public async lookup(fen: string) {
 		const epd = this.fen2epd(fen);
 		const range = await this.findKey(epd);
 		if (typeof range === 'undefined') return;
