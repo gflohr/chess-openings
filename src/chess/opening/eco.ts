@@ -6,7 +6,7 @@ export type ECOPosition = {
 	moves: string[];
 };
 
-export const eco = {
+export const eco: Record<string, ECOPosition> = {
 	'rnbqkbnr/pppppppp/8/8/8/7N/PPPPPPPP/RNBQKB1R b KQkq -': {
 		eco: 'A00',
 		name: 'Amar Opening',

@@ -4,7 +4,7 @@ describe('Entry', () => {
 	let entry: Entry;
 
 	beforeEach(() => {
-		entry = new Entry();
+		entry = new Entry('dummy');
 	});
 
 	describe('addMove', () => {

@@ -11,7 +11,8 @@ export interface Book {
 	open(): Promise<void>;
 
 	/**
-	 * Look-up a position.
+	 * Look-up a position by FEN or EPD. An Extended Position Description EPD
+	 * in this context is a FEN without move numbers.
 	 *
 	 * @returns an opening entry or undefined if none found
 	 */

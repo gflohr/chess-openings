@@ -67,7 +67,7 @@ export type ECOPosition = {
 	moves: string[];
 };
 
-export const eco = {
+export const eco: Record<string, ECOPosition> = {
 EOF
 
 foreach my $epd (@epds) {

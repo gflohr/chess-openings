@@ -1,8 +1,8 @@
 import * as fs from 'node:fs/promises';
-import { Book, EPSquare } from '../book';
+import { Book } from '../book';
 import { Uint64BE } from 'int64-buffer';
 import { Entry } from '../entry';
-import { parseFEN, pieceMapping } from '../../fen-parser';
+import { parseFEN, pieceMapping, EPSquare } from '../../fen-parser';
 
 const random64 = [
 	new Uint64BE(0x9d39247e, 0x33776d41),
@@ -834,11 +834,22 @@ export class Polyglot implements Book {
 		this.numEntries = size >> 4;
 	}
 
+	private fen2epd(fen: string) {
+		const tokens = fen.split(/[ \t]+/);
+
+		while (tokens.length > 4) {
+			tokens.pop();
+		}
+
+		return tokens.join(' ');
+	}
+
 	public async lookupFEN(fen: string) {
-		const range = await this.findKey(fen);
+		const epd = this.fen2epd(fen);
+		const range = await this.findKey(epd);
 		if (typeof range === 'undefined') return;
 
-		const entry = new Entry();
+		const entry = new Entry(epd);
 		for (let i = range[0]; i <= range[1]; ++i) {
 			entry.addMove(await this.getEntry(i));
 		}

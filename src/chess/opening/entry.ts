@@ -5,9 +5,12 @@ type MoveArguments = {
 };
 
 export class Entry {
+	private _epd: string;
 	private _moves: MoveArguments[] = [];
 
-	constructor() {}
+	constructor(epd: string) {
+		this._epd = epd;
+	}
 
 	/**
 	 * Add a move to the entry.
@@ -26,6 +29,13 @@ export class Entry {
 			weight,
 			learn,
 		});
+	}
+
+	/**
+	 * Get the position as an EPD (FEN without move numbers).
+	 */
+	public get epd(): string {
+		return this._epd;
 	}
 
 	/**

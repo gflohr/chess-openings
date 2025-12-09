@@ -830,7 +830,7 @@ describe('Polyglot lookup', () => {
 	];
 
 	it.each(tests)('%s', async (fen, moves) => {
-		const wantedEntry = new Entry();
+		const wantedEntry = new Entry(fen as string);
 
 		(moves as { move: string; weight: number }[]).forEach(moveSpec => {
 			wantedEntry.addMove(moveSpec);
