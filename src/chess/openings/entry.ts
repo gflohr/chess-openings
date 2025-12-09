@@ -143,6 +143,6 @@ export class Entry {
 		}
 
 		// Fallback (should not happen)
-		return this.continuations[this.continuations.length - 1].move;
+		return this._continuations[this._continuations.length - 1].move;
 	}
 }
