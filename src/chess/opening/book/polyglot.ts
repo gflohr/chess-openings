@@ -796,7 +796,7 @@ const randomWhite = random64.slice(780, 780 + 1);
 /**
  * The `Polyglot` class represents an opening book in Polyglot (.bin) format.
  */
-export class Polyglot extends Book {
+export class Polyglot implements Book {
 	private fh?: fs.FileHandle;
 	private filename: string;
 	private numEntries?: number;
@@ -808,7 +808,6 @@ export class Polyglot extends Book {
 	 * @param filename an optional filename if passing a file handle
 	 */
 	constructor(filenameOrFileHandle: string | fs.FileHandle, filename?: string) {
-		super();
 		if (typeof filenameOrFileHandle === 'string') {
 			this.filename = filenameOrFileHandle;
 		} else {
@@ -817,10 +816,7 @@ export class Polyglot extends Book {
 		}
 	}
 
-	/**
-	 * Initialises the object.
-	 */
-	async init() {
+	async open() {
 		if (typeof this.numEntries !== 'undefined') {
 			throw new Error('Object is already initialised!');
 		}

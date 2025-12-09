@@ -1,3 +1,4 @@
+import { Book } from '../book';
 import { Polyglot } from './polyglot';
 import * as fs from 'node:fs/promises';
 
@@ -17,21 +18,21 @@ describe('polyglot input methods', () => {
 		(fs.open as jest.Mock).mockResolvedValue(mockFileHandle);
 		(mockFileHandle.stat as jest.Mock).mockResolvedValue({ size: 64 });
 
-		const book = new Polyglot('book.bin');
-		await book.init();
+		const book: Book = new Polyglot('book.bin');
+		await book.open();
 
 		expect(fs.open).toHaveBeenCalledWith('book.bin', 'r');
 		expect(mockFileHandle.stat).toHaveBeenCalled();
-		expect(book['numEntries']).toBe(4);
+		expect((book as Polyglot)['numEntries']).toBe(4);
 	});
 
 	test('throws error if file size is not multiple of 16', async () => {
 		(fs.open as jest.Mock).mockResolvedValue(mockFileHandle);
 		(mockFileHandle.stat as jest.Mock).mockResolvedValue({ size: 30 });
 
-		const book = new Polyglot('book.bin');
+		const book: Book = new Polyglot('book.bin');
 
-		await expect(book.init()).rejects.toThrow(
+		await expect(book.open()).rejects.toThrow(
 			'File size is not a multiple of 16!',
 		);
 	});
@@ -40,9 +41,9 @@ describe('polyglot input methods', () => {
 		(fs.open as jest.Mock).mockResolvedValue(mockFileHandle);
 		(mockFileHandle.stat as jest.Mock).mockResolvedValue({ size: 32 });
 
-		const book = new Polyglot('book.bin');
-		await book.init();
+		const book: Book = new Polyglot('book.bin');
+		await book.open();
 
-		await expect(book.init()).rejects.toThrow('Object is already initialised!');
+		await expect(book.open()).rejects.toThrow('Object is already initialised!');
 	});
 });

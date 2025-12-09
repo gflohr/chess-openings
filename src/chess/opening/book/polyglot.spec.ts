@@ -7,7 +7,7 @@ describe('Polyglot lookup', () => {
 
 	beforeAll(async () => {
 		book = new Polyglot('./books/flohr.bin');
-		await book.init();
+		await book.open();
 	});
 
 	afterAll(async () => {
