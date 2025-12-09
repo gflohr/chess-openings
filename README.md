@@ -1,6 +1,6 @@
 # chess-openings
 
-The TypeScript library `chess-opening` can be used to read chess opening books
+The TypeScript library `chess-openings` can be used to read chess opening books
 in Polyglot (`.bin`) format and ECO data.
 
 It is a port of the Perl library
@@ -25,10 +25,10 @@ It is a port of the Perl library
 ## Installation
 
 ```
-npm install chess-openings
+pnpm install chess-openings
 ```
 
-Or use `pnpm`, `yarn`, `bun`, ...
+Or use `npm`, `yarn`, `bun`, ...
 
 ## Description
 
@@ -102,6 +102,8 @@ Getters and methods:
 
 #### `Polyglot`
 
+The `Polyglot` class represents an opening book in Polyglot (`.bin`) format.
+
 ```TypeScript
 import { Polyglot, Book } from 'chess-opening';
 
@@ -119,7 +121,11 @@ internally.
 
 #### `ECO`
 
-Implements the `Book` interface plus additional methods:
+The class `ECO` contains an opening classification according to the
+Encyclopedia of Chess Openings. The opening names and lines are identical to
+those used by [Lichess](https://lichess.org).
+
+The class implements the `Book` interface plus additional methods:
 
 * `lookupSync(epd)`
 
