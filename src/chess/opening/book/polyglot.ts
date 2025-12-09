@@ -2,6 +2,7 @@ import * as fs from 'node:fs/promises';
 import { Book, EPSquare } from '../book';
 import { Uint64BE } from 'int64-buffer';
 import { Entry } from '../entry';
+import { parseFEN, pieceMapping } from '../../fen-parser';
 
 const random64 = [
 	new Uint64BE(0x9d39247e, 0x33776d41),
@@ -849,6 +850,13 @@ export class Polyglot extends Book {
 		return entry;
 	}
 
+	public async close(): Promise<void> {
+		if (this.fh) {
+			await this.fh.close();
+			this.fh = undefined;
+		}
+	}
+
 	// Do a binary search in the file for the requested position.
 	// Using variations of the binary search like interpolation search or the
 	// newer adaptive search or hybrid search
@@ -921,12 +929,12 @@ export class Polyglot extends Book {
 	protected getKey(fen: string): Uint64BE | undefined {
 		let key = new Uint64BE(0, 0);
 
-		const pos = this.parseFEN(fen);
+		const pos = parseFEN(fen);
 		if (!pos) {
 			throw new Error(`invalid fen: ${fen}`);
 		}
 
-		const pieces = this.pieces();
+		const pieces = pieceMapping();
 
 		pos.pieces.forEach(spec => {
 			const fileChar = spec.square[0];

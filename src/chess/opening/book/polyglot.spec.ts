@@ -10,6 +10,10 @@ describe('Polyglot lookup', () => {
 		await book.init();
 	});
 
+	afterAll(async () => {
+		await book.close();
+	});
+
 	const tests = [
 		[
 			'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',

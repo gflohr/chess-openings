@@ -4,7 +4,7 @@
 			"type": "node",
 			"request": "launch",
 			"name": "Launch Program",
-			"program": "${workspaceFolder}/src/zzztest.ts",
+			"program": "${workspaceFolder}/src/chess/zzzjunk.ts",
 			"preLaunchTask": "tsc: build - tsconfig.json",
 			"outFiles": ["${workspaceFolder}/dist/**/*.js"]
 		},
