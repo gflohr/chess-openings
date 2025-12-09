@@ -10,12 +10,12 @@ describe('Entry', () => {
 	describe('addMove', () => {
 		it('adds a move with default weight and learn', () => {
 			entry.addMove({ move: 'e2e4' });
-			expect(entry['_moves']).toEqual([{ move: 'e2e4', weight: 1, learn: 0 }]);
+			expect(entry['_continuations']).toEqual([{ move: 'e2e4', weight: 1, learn: 0 }]);
 		});
 
 		it('adds a move with custom weight and learn', () => {
 			entry.addMove({ move: 'd2d4', weight: 3, learn: 2 });
-			expect(entry['_moves']).toEqual([{ move: 'd2d4', weight: 3, learn: 2 }]);
+			expect(entry['_continuations']).toEqual([{ move: 'd2d4', weight: 3, learn: 2 }]);
 		});
 
 		it('throws if move is missing', () => {
@@ -25,19 +25,19 @@ describe('Entry', () => {
 		});
 	});
 
-	describe('moves getter', () => {
-		it('returns a cloned array of moves', () => {
+	describe('continuations getter', () => {
+		it('returns a cloned array of continuations', () => {
 			entry.addMove({ move: 'e2e4' });
-			const moves = entry.moves;
-			expect(moves).toEqual([{ move: 'e2e4', weight: 1, learn: 0 }]);
-			// Modifying returned array should not affect internal _moves
-			moves.push({ move: 'd2d4', weight: 2, learn: 0 });
-			expect(entry['_moves']).toHaveLength(1);
+			const continuations = entry.continuations();
+			expect(continuations).toEqual([{ move: 'e2e4', weight: 1, learn: 0 }]);
+			// Modifying returned array should not affect internal _continuations
+			continuations.push({ move: 'd2d4', weight: 2, learn: 0 });
+			expect(entry['_continuations']).toHaveLength(1);
 		});
 	});
 
-	describe('getBestMoves', () => {
-		it('returns empty array if no moves', () => {
+	describe('getBestcontinuations', () => {
+		it('returns empty array if no continuations', () => {
 			expect(entry.getBestMoves()).toEqual([]);
 		});
 
@@ -47,7 +47,7 @@ describe('Entry', () => {
 			expect(entry.getBestMoves()).toEqual(['d2d4']);
 		});
 
-		it('returns multiple moves if tie in weight', () => {
+		it('returns multiple continuations if tie in weight', () => {
 			entry.addMove({ move: 'e2e4', weight: 2 });
 			entry.addMove({ move: 'd2d4', weight: 2 });
 			expect(entry.getBestMoves()).toEqual(
@@ -57,7 +57,7 @@ describe('Entry', () => {
 	});
 
 	describe('getBestMove', () => {
-		it('returns undefined if no moves', () => {
+		it('returns undefined if no continuations', () => {
 			expect(entry.getBestMove()).toBeUndefined();
 		});
 
@@ -66,7 +66,7 @@ describe('Entry', () => {
 			expect(entry.getBestMove()).toBe('e2e4');
 		});
 
-		it('returns one of the best moves randomly if tie', () => {
+		it('returns one of the best continuations randomly if tie', () => {
 			entry.addMove({ move: 'e2e4', weight: 2 });
 			entry.addMove({ move: 'd2d4', weight: 2 });
 
@@ -83,7 +83,7 @@ describe('Entry', () => {
 	});
 
 	describe('pickMove', () => {
-		it('returns undefined if no moves', () => {
+		it('returns undefined if no continuations', () => {
 			expect(entry.pickMove()).toBeUndefined();
 		});
 

@@ -4,9 +4,28 @@ type MoveArguments = {
 	learn?: number;
 };
 
+/**
+ * A continuation.
+ */
+export type Continuation = {
+	/**
+	 * The move in any notation.
+	 */
+	move: string;
+
+	/**
+	 * The weight (default 1).
+	 */
+	weight: number;
+
+	/**
+	 * An additional number describing the move.
+	 */
+	learn: number;
+}
 export class Entry {
 	private _epd: string;
-	private _moves: MoveArguments[] = [];
+	private _continuations: Continuation[] = [];
 
 	constructor(epd: string) {
 		this._epd = epd;
@@ -24,7 +43,7 @@ export class Entry {
 		const weight = args.weight ?? 1;
 		const learn = args.learn ?? 0;
 
-		this._moves.push({
+		this._continuations.push({
 			move: args.move,
 			weight,
 			learn,
@@ -44,8 +63,8 @@ export class Entry {
 	 *
 	 * @returns an array of move objects with meta data
 	 */
-	public get moves(): MoveArguments[] {
-		return structuredClone(this._moves);
+	public continuations(): Continuation[] {
+		return structuredClone(this._continuations);
 	}
 
 	/**
@@ -57,14 +76,14 @@ export class Entry {
 		let maxWeight = -1;
 		const best: string[] = [];
 
-		this._moves.forEach(move => {
-			const weight = move.weight ?? 0;
+		this._continuations.forEach(continuation => {
+			const weight = continuation.weight ?? 0;
 			if (weight > maxWeight) {
 				maxWeight = weight;
 				best.length = 0;
-				best.push(move.move);
+				best.push(continuation.move);
 			} else if (weight === maxWeight) {
-				best.push(move.move);
+				best.push(continuation.move);
 			}
 		});
 
@@ -96,16 +115,16 @@ export class Entry {
 	 * @returns a random move in book notation or undefined if there are no moves
 	 */
 	public pickMove(): string | undefined {
-		if (this.moves.length === 0) {
+		if (this._continuations.length === 0) {
 			return undefined;
 		}
 
 		// Compute total weight.
-		const totalWeight = this.moves.reduce((sum, m) => sum + (m.weight ?? 0), 0);
+		const totalWeight = this._continuations.reduce((sum, m) => sum + (m.weight ?? 0), 0);
 		if (totalWeight === 0) {
 			// All weights are zero -> pick randomly.
-			const index = Math.floor(Math.random() * this.moves.length);
-			return this.moves[index].move;
+			const index = Math.floor(Math.random() * this._continuations.length);
+			return this._continuations[index].move;
 		}
 
 		// Pick a random number between 0 and totalWeight
@@ -113,7 +132,7 @@ export class Entry {
 
 		// Walk through the moves until we reach the randomly selected weight
 		let accumulated = 0;
-		for (const m of this.moves) {
+		for (const m of this._continuations) {
 			accumulated += m.weight ?? 0;
 			if (rnd < accumulated) {
 				return m.move;
@@ -121,6 +140,6 @@ export class Entry {
 		}
 
 		// Fallback (should not happen)
-		return this.moves[this.moves.length - 1].move;
+		return this.continuations[this.continuations.length - 1].move;
 	}
 }

@@ -1,7 +1,7 @@
 {
-	"name": "chess-abtester",
-	"version": "1.0.0",
-	"description": "",
+	"name": "chess-openings",
+	"version": "0.1.0",
+	"description": "Read chess opening books in Polyglot (`.bin`) format and ECO data.",
 	"main": "index.js",
 	"scripts": {
 		"build": "rimraf ./dist && tsc --project tsconfig.build.json && chmod +x dist/index.js",
