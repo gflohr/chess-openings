@@ -1,6 +1,6 @@
 {
 	"name": "chess-openings",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Read chess opening books in Polyglot (`.bin`) format and ECO data.",
 	"main": "index.js",
 	"scripts": {
