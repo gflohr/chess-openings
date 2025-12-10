@@ -3,6 +3,9 @@
 	"version": "0.1.1",
 	"description": "Read chess opening books in Polyglot (`.bin`) format and ECO data.",
 	"main": "dist/index.js",
+	"files": [
+		"dist"
+	],
 	"scripts": {
 		"build": "rimraf ./dist && tsc --project tsconfig.build.json && chmod +x dist/index.js",
 		"prepublishOnly": "bun run build",
