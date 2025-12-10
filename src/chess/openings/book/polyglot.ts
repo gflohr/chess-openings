@@ -1103,11 +1103,8 @@ export class Polyglot implements Book {
 			e8h8: { piece: 'k', square: 'e8' },
 		};
 		if (Object.prototype.hasOwnProperty.call(castlings, move)) {
-			console.log(`castling? ${move}`);
 			const pos = parseFEN(fen)!;
-			console.dir(pos);
 			const king = castlings[move] as LocatedPiece;
-			console.log('king:', king);
 			if (
 				pos?.pieces.some(
 					pieceLoc =>
@@ -1116,9 +1113,7 @@ export class Polyglot implements Book {
 			) {
 				// This is enough testing. If the piece is a king, and does
 				// this move, it is a castling.
-				console.log(`move before ${move}`);
 				move = move.replace('a', 'c').replace('h', 'g');
-				console.log(`move after ${move}`);
 			}
 		}
 
