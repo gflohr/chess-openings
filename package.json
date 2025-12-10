@@ -27,11 +27,6 @@
 			"json",
 			"ts"
 		],
-		"moduleNameMapper": {
-			"^@e-invoice-eu/core$": "<rootDir>/../../../packages/core/src",
-			"^chalk$": "<rootDir>/../src/stubs/chalk.ts",
-			"^yargs$": "<rootDir>/../src/stubs/yargs.ts"
-		},
 		"rootDir": "src",
 		"testRegex": "\\.spec\\.ts$",
 		"transform": {
