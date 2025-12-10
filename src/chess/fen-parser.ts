@@ -97,7 +97,7 @@ export type EPSquare =
 	| 'g6'
 	| 'h6';
 
-type LocatedPiece = {
+export type LocatedPiece = {
 	piece: PieceChar;
 	square: Square;
 };

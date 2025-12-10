@@ -2,7 +2,12 @@ import * as fs from 'node:fs/promises';
 import { Book } from '../book';
 import { Uint64BE } from 'int64-buffer';
 import { Entry } from '../entry';
-import { parseFEN, pieceMapping, EPSquare } from '../../fen-parser';
+import {
+	parseFEN,
+	pieceMapping,
+	EPSquare,
+	LocatedPiece,
+} from '../../fen-parser';
 
 const random64 = [
 	new Uint64BE(0x9d39247e, 0x33776d41),
@@ -790,7 +795,7 @@ const random64 = [
 
 const randomPiece = random64.slice(0, 768);
 const randomCastling = random64.slice(768, 768 + 4);
-const randomEnPassant = random64.slice(764, 764 + 4);
+const randomEnPassant = random64.slice(772, 772 + 8);
 const randomWhite = random64.slice(780, 780 + 1);
 
 /**
@@ -851,7 +856,7 @@ export class Polyglot implements Book {
 
 		const entry = new Entry(epd);
 		for (let i = range[0]; i <= range[1]; ++i) {
-			entry.addContinuation(await this.getEntry(i));
+			entry.addContinuation(await this.getEntry(i, fen));
 		}
 
 		return entry;
@@ -968,7 +973,7 @@ export class Polyglot implements Book {
 
 		if (pos.epSquare) {
 			const epFile = pos.epSquare[0];
-			const epCharCode = epFile.charCodeAt(0) - 'a'.charCodeAt(0);
+			const epCharCode = epFile.charCodeAt(0);
 
 			// This may produce invalid coordinates for the a and h rank but this
 			// is harmless.
@@ -988,7 +993,10 @@ export class Polyglot implements Book {
 			SPEC: for (const spec of pos.pieces) {
 				for (const square of pawns) {
 					if (spec.square === square && spec.piece === pawn) {
-						key = this.xor64(key, randomEnPassant[epCharCode]);
+						key = this.xor64(
+							key,
+							randomEnPassant[epCharCode - 'a'.charCodeAt(0)],
+						);
 						break SPEC;
 					}
 				}
@@ -1048,6 +1056,7 @@ export class Polyglot implements Book {
 
 	protected async getEntry(
 		num: number,
+		fen: string,
 	): Promise<{ move: string; weight?: number; learn?: number }> {
 		const offset = num << 4;
 		const buf = Buffer.alloc(16);
@@ -1075,7 +1084,7 @@ export class Polyglot implements Book {
 		const promote = (moveBits >> 12) & 0x7;
 		const promotionPieces = ['', 'k', 'b', 'r', 'q'];
 
-		const move =
+		let move =
 			String.fromCharCode('a'.charCodeAt(0) + fromFile) +
 			String.fromCharCode('1'.charCodeAt(0) + fromRank) +
 			String.fromCharCode('a'.charCodeAt(0) + toFile) +
@@ -1084,6 +1093,33 @@ export class Polyglot implements Book {
 
 		if (!/^[a-h][1-8][a-h][1-8][kbrq]?$/.test(move)) {
 			throw new Error(`error: '${this.filename}' is corrupted`);
+		}
+
+		// Castling are encoded as e1h1 instead of e1g1 etc.
+		const castlings: Record<string, LocatedPiece> = {
+			e1a1: { piece: 'K', square: 'e1' },
+			e1h1: { piece: 'K', square: 'e1' },
+			e8a8: { piece: 'k', square: 'e8' },
+			e8h8: { piece: 'k', square: 'e8' },
+		};
+		if (Object.prototype.hasOwnProperty.call(castlings, move)) {
+			console.log(`castling? ${move}`);
+			const pos = parseFEN(fen)!;
+			console.dir(pos);
+			const king = castlings[move] as LocatedPiece;
+			console.log('king:', king);
+			if (
+				pos?.pieces.some(
+					pieceLoc =>
+						pieceLoc.piece === king.piece && pieceLoc.square === king.square,
+				)
+			) {
+				// This is enough testing. If the piece is a king, and does
+				// this move, it is a castling.
+				console.log(`move before ${move}`);
+				move = move.replace('a', 'c').replace('h', 'g');
+				console.log(`move after ${move}`);
+			}
 		}
 
 		return { move, weight, learn };
